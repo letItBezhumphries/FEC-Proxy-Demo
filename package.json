@@ -1,18 +1,21 @@
 {
   "name": "proxy-demo",
   "version": "1.0.0",
-  "description": "",
+  "description": "Proxy server for FEC Project",
   "main": "server.js",
   "scripts": {
     "start": "node ./server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Eric Humphries",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
     "npm-run-all": "^4.1.5"
+  },
+  "devDependencies": {
+    "eslint-config-hackreactor": "git://github.com/reactorcore/eslint-config-hackreactor"
   }
 }
