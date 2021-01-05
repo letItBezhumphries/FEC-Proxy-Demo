@@ -11,20 +11,137 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
     integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
     crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+    crossorigin="anonymous">
   <link rel="stylesheet" href="/style.css">
-  <title>FEC Demo</title>
+  <!--link for reviews styles    -->
+  <title>BrokenTable</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 
 <body>
-  <main id="main">
+  <main class="container-fluid">
     Hello World this is the Home page from Proxy
     <div id="Info"></div>
     <div id="Photogallery"></div>
     <div id="Reviews"></div>
     <script type="text/javascript" src='http://localhost:3001/bundle.js'></script>
-    <script type="text/javascript" src='http://localhost:3002/bundle.js'></script>
-    <script type="text/javascript" src='http://localhost:3003/bundle.js'></script>
+<!--     <script type="text/javascript" src='http://localhost:3002/bundle.js'></script> -->
+<!--     <script type="text/javascript" src='http://localhost:3003/bundle.js'></script> -->
   </main>
+  
+  <footer class="container-fluid footerContainer">
+    <div class="emailSectionContainer">
+      <div class="footerEmailTitleContainer">
+        <div class="footerEmailTitle">Become an Insider</div>
+        <div class="footerEmailSubtitle">Gain access to exclusive offers, best-of lists, local events & more (you can unsubscribe
+          any time).
+        </div>
+      </div>
+      <div class="inputAndButton  bottomBorder">
+        <div class="subscribeContainer">
+          <input class="subscribe" type="email" name="subscribe" id="subscribe" placeholder="Email">
+        </div>
+        <div class="subscribeButtonContainer">
+          <button class="subscribeButton">Sign Up</button>
+        </div>
+      </div>
+    </div>
+    <div class="linksSectionContainer">
+      <div class="seeRestaurants bottomBorder">
+        <span class="seeRestaurantsLink">See Full Restaurant List</span>
+      </div>
+      <div class="discoverContainer linksBox">
+        <h6 class="linksTitle">DISCOVER</h6>
+        <ul>
+          <li>
+            <div class="exampleLink">Dining Rewards</div>
+          </li>
+          <li>
+            <div class="exampleLink">Private Dining</div>
+          </li>
+          <li>
+            <div class="exampleLink">Top 100 Restaurants</div>
+          </li>
+          <li>
+            <div class="exampleLink">Reserve For Others</div>
+          </li>
+          <li>
+            <div class="exampleLink">Cuisines Near Me</div>
+          </li>
+        </ul>
+      </div>
+      <div class="brokenTableContainer linksBox">
+        <h6 class="linksTitle">BROKENTABLE</h6>
+        <ul>
+          <li>
+            <div class="exampleLink">About Us</div>
+          </li>
+          <li>
+            <div class="exampleLink">Blog</div>
+          </li>
+          <li>
+            <div class="exampleLink">Careers</div>
+          </li>
+          <li>
+            <div class="exampleLink">Press</div>
+          </li>
+        </ul>
+      </div>
+      <div class="moreContainer linksBox">
+        <h6 class="linksTitle">MORE</h6>
+        <ul>
+          <li>
+            <div class="exampleLink">BrokenTable for iOS</div>
+          </li>
+          <li>
+            <div class="exampleLink">BrokenTable for Android</div>
+          </li>
+          <li>
+            <div class="exampleLink">Affiliate Program</div>
+          </li>
+          <li>
+            <div class="exampleLink">Contact Us</div>
+          </li>
+        </ul>
+      </div>
+      <div class="ourSitesContainer linksBox">
+        <h6 class="linksTitle">OUR SITES</h6>
+        <ul>
+          <li>
+            <div class="exampleLink">BrokenTable.jp</div>
+          </li>
+          <li>
+            <div class="exampleLink">BrokenTable.de</div>
+          </li>
+          <li>
+            <div class="exampleLink">BrokenTable.ca</div>
+          </li>
+          <li>
+            <div class="exampleLink">BrokenTable.es</div>
+          </li>
+          <li>
+            <div class="exampleLink">BrokenTable.hk</div>
+          </li>
+          <li>
+            <div class="exampleLink">BrokenTable.ie</div>
+          </li>
+          <li>
+            <div class="exampleLink">BrokenTable.co.uk</div>
+          </li>
+        </ul>
+      </div>
+      <div class="restauranteursContainer linksBox">
+        <h6 class="linksTitle">RESTAURANTEURS</h6>
+        <div class="fakeButton exampleLink">Delight more diners</div>
+        <div class="fakeButton exampleLink">Open for Business Blog</div>
+      </div>
+    </div>
+    <div class="copyrightEtcContainer bottomBorder">
+      <div class="copyrightText">Copyright © 2019 The Busboys, Inc.</div>
+    </div>
+  </footer>
 </body>
 
 </html>
