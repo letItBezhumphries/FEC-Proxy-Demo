@@ -18,3 +18,147 @@
   font-size: medium;
   text-align: center;
 }
+
+.footerContainer {
+  background-color: #333333;
+  line-height: 1.5em;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
+  max-width: 70rem;
+  display: block;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.footerEmailTitleContainer {
+  color: #ffffff;
+  padding: 0.5rem;
+}
+
+.footerEmailTitle {
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+}
+
+.footerEmailSubtitle {
+  padding-bottom: 0.5rem;
+}
+
+.emailSectionContainer {
+  padding-left: 0.5rem;
+}
+
+.bottomBorder {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,.2);
+}
+
+.subscribe {
+  line-height: 1rem;
+  font-size: 1rem;
+  padding: 0.75rem;
+  width: 100%;
+  clear: both;
+}
+
+.inputAndButton {
+  padding-left: 0.5rem;
+}
+
+.subscribeContainer {
+  width: 40%;
+  display: inline-block;
+  border-radius: 3px;
+  margin-right: 1.5rem;
+}
+
+.subscribeButton {
+  background-color: rgb(88, 166, 194);
+  color: white;
+  border: solid transparent;
+  border-radius: 5%;
+  line-height: 1rem;
+  border-radius: 0;
+  font-size: 1rem;
+  padding: 14px 40px;
+  clear: both;
+  transition: background-color 0.5s ease;
+}
+
+.subscribeButton:hover {
+  background-color: rgb(76, 136, 158);
+}
+
+.subscribeButtonContainer {
+  display: inline-block;
+  width: 20%;
+}
+
+.seeRestaurants {
+  margin: 1rem 0;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.seeRestaurantsLink {
+  cursor: pointer;
+}
+
+.linksSectionContainer {
+  width: 100%;
+  display: table;
+  padding-left: 0.5rem;
+}
+
+.linksTitle {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.linksBox {
+  float: left;
+  width: 20%;
+  padding-right: 0.75rem;
+}
+
+.exampleLink {
+  cursor: pointer;
+  color: #acacac;
+  font-size: 0.875rem;
+}
+
+.exampleLink:hover {
+  color: #ffffff;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fakeButton {
+  color: #ffffff;
+  background: #666;
+  padding: .6rem .8rem;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 2rem;
+  transition: background-color 0.5s ease;
+}
+
+.fakeButton:hover {
+  background-color: #999999;
+}
+
+.copyrightEtcContainer {
+  display: block;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.copyrightText {
+  font-size: 0.8rem;
+  color: #acacac;  
+}
