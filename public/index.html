@@ -16,6 +16,11 @@
     crossorigin="anonymous">
   <link rel="stylesheet" href="/style.css">
   <!--link for reviews styles    -->
+  <!--link rel="stylesheet" href=${process.env.REVIEW_SRC_IP} + "/style.css"-->
+    <!--link for restaurant styles    -->
+  <!--link rel="stylesheet" href=${process.env.RESTAURANT_SRC_IP} + "/style.css"-->
+    <!--link for photogalllery styles    -->
+  <!--link rel="stylesheet" href=${process.env.PHOTO_SRC_IP} + "/style.css"-->
   <title>BrokenTable</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
@@ -26,9 +31,12 @@
     <div id="Info"></div>
     <div id="Photogallery"></div>
     <div id="Reviews"></div>
-    <script type="text/javascript" src='http://localhost:3001/bundle.js'></script>
+<!--     <script type="text/javascript" src='http://localhost:3001/bundle.js'></script> -->
+<!--     <script type="text/javascript" src=${process.env.RESTAURANT_SRC_IP} + '/bundle.js'></script>-->
 <!--     <script type="text/javascript" src='http://localhost:3002/bundle.js'></script> -->
+    <script type="text/javascript" src=${process.env.PHOTO_SRC_IP} + '/bundle.js'></script>
 <!--     <script type="text/javascript" src='http://localhost:3003/bundle.js'></script> -->
+<!--     <script type="text/javascript" src=${process.env.REVIEW_SRC_IP} + '/bundle.js'></script> -->
   </main>
   
   <footer class="container-fluid footerContainer">
