@@ -1,7 +1,323 @@
 version: 2.1
-orbs:
-  node: circleci/node@3.0.0
+executors:
+  proxy-executor:
+    docker:
+      - image: circleci/node:14.5.0
+    working_directory: ~/proxy-repo
+  terraform-executor:
+    docker:
+      - image: hashicorp/terraform:0.14.3
+
+aliases:
+  - &show-current-branch-name
+    run:
+      name: Show current branch
+      command: echo ${CIRCLE_BRANCH}
+  - &restore-cache
+    restore_cache:
+      keys:
+        - proxyApp-{{ checksum "package.json" }}
+        - proxyApp-
+  - &install-dependencies
+    run:
+      name: Install dependencies
+      command: |
+        mkdir -p artifacts
+        npm install
+  - &save-cache
+    save_cache:
+      paths:
+        - node_modules
+      key: proxyApp-{{ checksum "package.json" }}
+  - &install-aws-cli
+    run:
+      name: Installing AWS_CLI
+      working_directory: /
+      command: |
+        sudo apt-get -y -qq update
+        sudo apt-get install -y awscli
+        sudo apt-get install -y python-pip python-dev build-essential
+  - &install-packer
+    run:
+      name: Install packer
+      command: |
+        wget -q https://releases.hashicorp.com/packer/1.6.2/packer_1.6.2_linux_amd64.zip
+        unzip -o packer_1.6.2_linux_amd64.zip -d /usr/local/bin
+        rm packer_1.6.2_linux_amd64.zip
+
+jobs:
+  build:
+    executor: proxy-executor
+    steps:
+      - checkout
+      - *show-current-branch-name
+      - *restore-cache
+      - *install-dependencies
+      - *save-cache
+      - run:
+          name: Copy infrastructure folder
+          command: cp -r infrastructure artifacts/infrastructure
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
+
+  linting:
+    executor: proxy-executor
+    steps:
+      - checkout
+      - *show-current-branch-name
+      - *restore-cache
+      - run:
+          name: Run linting
+          command: npm run lint
+
+  prettier:
+    executor: proxy-executor
+    steps:
+      - checkout
+      - *show-current-branch-name
+      - *restore-cache
+      - run:
+          name: Run prettier check
+          command: npm run prettier:check
+
+  packer-validate:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - *show-current-branch-name
+      - *install-packer
+      - run:
+          name: Check Packer version
+          command: |
+            cd infrastructure/
+            packer validate proxy-packer.json
+
+  packer-build-ami:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - *install-packer
+      - run:
+          name: Packer build ami
+          command: |
+            cd infrastructure/
+            ARTIFACT=$(packer build -machine-readable proxy-packer.json | awk -F, '$0 ~/artifact,0,id/ {print $6}')
+            echo 'export AMI_ID=$(echo $ARTIFACT | cut -d ":" -f2)' >> $BASH_ENV;
+            source $BASH_ENV;
+            echo ${AMI_ID}
+            echo 'variable "AMI_ID" { default = "'${AMI_ID}'" }' > amivar.tf;
+      - run:
+          name: Copy amivar.tf to workspace directory
+          command: |
+            mkdir -p artifacts
+            cp infrastructure/amivar.tf artifacts/infrastructure/
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - infrastructure/amivar.tf
+            - artifacts/infrastructure/amivar.tf
+
+  terraform-validate:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - run:
+          name: Terraform validate & format
+          command: |
+            cd infrastructure/
+            terraform init -backend=false
+            terraform validate
+            terraform fmt -check
+
+  terraform-plan-and-apply:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - run:
+          name: Terraform Plan
+          command: |
+            cd artifacts/infrastructure/
+            cat amivar.tf
+            terraform init
+            terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
+            terraform plan
+      - run:
+          name: Terraform Apply
+          command: |
+            cd artifacts/infrastructure/
+            cat amivar.tf
+            terraform workspace select ${CIRCLE_BRANCH}
+            terraform apply --auto-approve
+            echo 'export PROXY_IP=$(terraform output ELB)' >> $BASH_ENV
+            terraform output ELB > ../ELB.txt
+            terraform output proxy_instance_sgid > ../proxy_instance_sgid.txt
+            terraform output elb_sgid > ../elb_sgid.txt
+            echo ${PROXY_IP}
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - artifacts
+
+  deploy-to-aws-s3:
+    executor: proxy-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - *install-aws-cli
+      - run:
+          name: Deploy to AWS s3
+          command: |
+            AWS_BUCKET_NAME=$(cat artifacts/proxy_bucket_name.txt | sed 's/\"//g')
+            echo $AWS_BUCKET_NAME
+            if [ "${CIRCLE_BRANCH}" == "master" ]
+            then 
+              aws --region ${AWS_REGION} s3 sync ~/proxy-repo/public/dist s3://${AWS_BUCKET_NAME} --delete
+            elif [ "${CIRCLE_BRANCH}" == "staging" ]
+            then 
+              aws --region ${AWS_REGION} s3 sync ~/proxy-repo/public/dist s3://${AWS_BUCKET_NAME} --delete
+            else
+              aws --region ${AWS_REGION} s3 sync ~/proxy-repo/public/dist s3://${AWS_BUCKET_NAME} --delete
+            fi
+
+  deploy-to-aws-cloudfront:
+    executor: proxy-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - *show-current-branch-name
+      - *install-aws-cli
+      - run:
+          name: Deploy to AWS Cloudfront
+          command: |
+            CLOUDFRONT_DIST_ID=$(cat artifacts/proxy_cloudfront_distribution_id.txt | sed 's/\"//g')
+            echo $CLOUDFRONT_DIST_ID
+            aws configure set preview.cloudfront true
+            if [ "${CIRCLE_BRANCH}" == "master" ]
+            then 
+              aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DIST_ID} --paths /\* 
+            elif [ "${CIRCLE_BRANCH}" == "staging" ]
+            then 
+              aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DIST_ID} --paths /\*
+            else
+              aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DIST_ID} --paths /\*  
+            fi
+
+  terraform-destroy:
+    executor: terraform-executor
+    steps:
+      - checkout
+      - *show-current-branch-name
+      - run:
+          name: Terraform Destroy
+          command: |
+            cd infrastructure/
+            terraform init
+            terraform workspace select ${CIRCLE_BRANCH} || terraform workspace new ${CIRCLE_BRANCH}
+            terraform destroy --auto-approve
+
 workflows:
-  node-tests:
+  build-and-deploy:
     jobs:
-      - node/test
+      - build
+      - linting:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - prettier:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - packer-validate:
+          requires:
+            - linting
+            - prettier
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - packer-build-ami:
+          requires:
+            - packer-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - terraform-validate:
+          requires:
+            - packer-build-ami
+            # - linting
+            # - prettier
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - terraform-plan-and-apply:
+          requires:
+            - terraform-validate
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - deploy-to-aws-s3:
+          requires:
+            - terraform-plan-and-apply
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - deploy-to-aws-cloudfront:
+          requires:
+            - deploy-to-aws-s3
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
+      - hold:
+          type: approval
+          requires:
+            - deploy-to-aws-cloudfront
+      - terraform-destroy:
+          requires:
+            - hold
+          filters:
+            branches:
+              only:
+                - develop
+                - staging
+                - master
